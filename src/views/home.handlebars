@@ -1,0 +1,20 @@
+<a href="/src/views/home.handlebars"><h1>Ir al chat</h1></a>
+<a href="/cart/652ef354db2a8009e0821d66"><h1>Ir al Carrito</h1></a>
+<h1>Productos</h1>
+<div class="shop">
+    {{#each products}}
+    <div class="productos">
+        <img class="vuelta" src={{carru1}} alt={{nombre}} /> <!-- Cambiado a "nombre" -->
+        <div class="infoCard">
+            <div class="textosprod">
+                <h2 class="productos__nombre">{{product.nombre}}</h2> <!-- Cambiado a "nombre" -->
+                <div>
+                    <h2 class="productos__precio">${{product.precio}}</h2> <!-- Cambiado a "precio" -->
+                </div>
+                <button class="add-to-cart-btn" data-product-id="{{_id}}">Agregar al carrito</button>
+                <a href="/products/{{_id}}">Ver detalles</a>
+            </div>
+        </div>
+    </div>
+    {{/each}}
+</div>

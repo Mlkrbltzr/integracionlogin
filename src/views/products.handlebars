@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mestizzo</title>
+    <link rel="stylesheet" href="/css/style.css"> 
+</head>
+<body>
+    <h1>Mestizzo</h1>
+
+    {{#if products.length}}
+    <div class="product-list">
+        {{#each products}}
+        <div class="product-card">
+            <h2>{{nombre}}</h2> 
+            <p>{{descripcion}}</p>
+            <p>Precio: ${{precio}}</p> <!-- Corrección aquí -->
+            <a href="/products/{{_id}}">Ver más</a> 
+        </div>
+        {{/each}}
+    </div>
+    {{else}}
+    <p>No hay productos disponibles en este momento.</p>
+    {{/if}}
+</body>
+</html>

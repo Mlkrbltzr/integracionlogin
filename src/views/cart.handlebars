@@ -1,0 +1,14 @@
+<h1>Carrito de Compras</h1>
+<div class="cart-details">
+    <h2>Detalles del Carrito</h2>
+    <ul>
+        {{#each cartWithProducts.products}}
+            <li>
+                {{this.productId.nombre}} - Precio: ${{this.productId.precio}} - Cantidad: {{this.quantity}}
+                <!-- El botón debe tener un atributo data-productid -->
+                <button class="remove-from-cart" data-productid="{{this.productId._id}}">Eliminar</button>
+            </li>
+        {{/each}}
+    </ul>
+</div>
+<a href="/">Volver a la lista de productos</a>

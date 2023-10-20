@@ -1,0 +1,142 @@
+body {
+    background-color: #99212B;
+
+}
+
+  
+  .shop {
+    display: grid;
+    grid-template-columns: 2fr 2fr 2fr 2fr;
+    padding: 10px;
+  
+  }
+  @media screen and (max-width: 1056px) {
+    .shop {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+.productos {
+    padding: 15px;
+    display: flex;
+    background-color: #D9D9D9;
+    border-radius: 25px;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: center;
+    transition: 0.5s;
+    margin: 20px;
+    
+  }
+.productos:hover {
+    transform: scale(102%);
+    box-shadow: 8px 8px 20px rgb(83, 0, 0);
+  }
+.productos .vuelta {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border-radius: 25px;
+  }
+  @media screen and (max-width: 1056px) {
+  .productos .vuelta {
+      height: 390px;
+    }
+  }
+  @media screen and (max-width: 820px) {
+ .productos .vuelta {
+      height: 340px;
+    }
+  }
+  @media screen and (max-width: 650px) {
+ .productos .vuelta {
+      height: 220px;
+    }
+  }
+  @media screen and (max-width: 450px) {
+ .productos .vuelta {
+      height: 150px;
+    }
+  }
+
+
+  @media screen and (max-width: 1056px) {
+ .productos {
+      width: 90%;
+    }
+  }
+  @media screen and (max-width: 650px) {
+ .productos {
+      width: 80%;
+      margin: 15px;
+    }
+  }
+ .productos__image {
+    width: 100%;
+    border-radius: 25px;
+  }
+
+ .infoCard {
+  display: flex;
+  flex-direction: column;
+ }
+
+ .textosprod {
+  display: flex;
+  flex-direction: column;
+ }
+ .productos__precio {
+    color: #8f0000;
+    display: flex;
+    font-size: 70px;
+    font-family: "AdventPro";
+    font-weight: bold;
+    
+  }
+  @media screen and (max-width: 650px) {
+ .productos__precio {
+      font-size: 40px;
+    }
+  }
+.productos__gramo {
+    color: black;
+    display: flex;
+    font-size: 35px;
+    font-family: "OswaldR";
+    
+  }
+  @media screen and (max-width: 650px) {
+.productos__gramo {
+      font-size: 15px;
+    }
+  }
+.productos__nombre {
+    color: black;
+    display: flex;
+    font-size: 60px;
+    font-family: "AdventPro";
+    line-height: 60px;
+  }
+  @media screen and (max-width: 650px) {
+.productos__nombre {
+      font-size: 30px;
+    }
+  }
+
+
+  .detalle {
+    display: flex;
+    color: #7b7b7b;
+    font-size: 40px;
+    font-family:"AdventPro";
+    
+    
+  }
+
+  .irCarritoItem {
+    color: red;
+    font-size: 20px;
+  }
