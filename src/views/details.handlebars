@@ -1,18 +1,33 @@
+<!-- viewProducts.handlebars -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detalles del Producto</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <title>Detalle Producto</title>
+    <!-- Agrega tus estilos CSS aquí -->
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-    <h1>Detalles del Producto</h1>
-<div class="product-details">
-    <h2>{{product.nombre}}</h2>
-    <p>{{product.descripcion}}</p>
-    <p>Precio: ${{product.precio}}</p>
-    <a href="/cart/{{product._id}}">Agregar al carrito</a>
-</div>
+    <header>
+        <h1>{{title}}</h1>
+        <a href="/products">Volver a la lista de productos</a>
+    </header>
+
+    <div class="product-details">
+        <p>{{product._id}}</p>
+        <h2>{{product.description}}</h2>
+        <p>Precio: ${{product.price}}</p>
+        <p>Stock: {{product.stock}}</p>
+        <p>Categoría: {{product.category}}</p>
+        <p>Estado: {{product.availability}}</p>
+        <button>Agregar al Carrito</button>
+    </div>
+
+    <!-- Agrega cualquier otro contenido que desees mostrar en la página -->
+
+    <footer>
+        <!-- Agrega contenido del pie de página si es necesario -->
+    </footer>
 </body>
 </html>

@@ -4,6 +4,33 @@ import ProductManager  from "../controllers/ProductManager.js"
 export const router = Router()
 const products =new ProductManager()
 
+
+
+// Ruta para agregar productos (POST a /api/products)
+router.post("/" , async(req,res)=> {
+    let{title,
+        description,
+        price,
+        stock,
+        category,
+        minimo,
+        availability
+    }= req.body
+
+    if(!title || !description || !price || !stock || !category || !minimo || !availability){
+        res.send({status: "error", error: "Faltan datos"})
+    }
+    let result = await productsModel.create({
+        title,
+        description,
+        price,
+        stock,
+        category,
+        minimo,
+        availability
+    })
+    res.send({result: "success", payload: result})
+})
 //get
 router.get("/", async(req,res)=> {
     try {
@@ -38,6 +65,7 @@ router.put("/:id_products", async(req,res)=> {
     res.send({result: "success", payload: result})
 })
 
+
 //delete
 router.delete("/:id_products", async(req,res)=>{
     let{id_products}= req.params
@@ -64,7 +92,7 @@ router.get("/page/:page" , async (req,res) => {
 
 router.get("/buscar/query", async(req,res) =>{
     const query = req.query.q
-    res.send(await product.getProductsByQuery(query))
+    res.send(await products.getProductsByQuery(query))
 })
 
 

@@ -4,12 +4,12 @@
 <div class="shop">
     {{#each products}}
     <div class="productos">
-        <img class="vuelta" src={{carru1}} alt={{nombre}} /> <!-- Cambiado a "nombre" -->
+        <img class="vuelta" src={{carru1}} alt={{this.title}} /> <!-- Cambiado a "nombre" -->
         <div class="infoCard">
             <div class="textosprod">
-                <h2 class="productos__nombre">{{product.nombre}}</h2> <!-- Cambiado a "nombre" -->
+                <h2 class="productos__nombre">{{this.title}}</h2> <!-- Cambiado a "nombre" -->
                 <div>
-                    <h2 class="productos__precio">${{product.precio}}</h2> <!-- Cambiado a "precio" -->
+                    <h2 class="productos__precio">${{this.price}}</h2> <!-- Cambiado a "precio" -->
                 </div>
                 <button class="add-to-cart-btn" data-product-id="{{_id}}">Agregar al carrito</button>
                 <a href="/products/{{_id}}">Ver detalles</a>

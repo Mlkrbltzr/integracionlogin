@@ -1,19 +1,16 @@
-document.getElementById('username-form').addEventListener('submit', async (e) => {
+document.getElementById('file-form').addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const userInputElement = document.getElementById('username');
-    const messageInputElement = document.getElementById('message');
-
-    const user = userInputElement.value;
-    const message = messageInputElement.value;
+    const fileInputElement = document.getElementById('file');
+    const file = fileInputElement.files[0]
 
     try {
-        const response = await fetch('/api/msg', {
+        const formData = new FormData();
+        formData.append('file', file); 
+
+        const response = await fetch('/upload', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ user, message }),
+            body: formData, 
         });
 
         if (response.ok) {
@@ -23,7 +20,7 @@ document.getElementById('username-form').addEventListener('submit', async (e) =>
             Swal.fire({
                 icon: 'success',
                 title: successMessage,
-                text: `Mensaje Enviado Correctamente`,
+                text: `Imagen Cargada Correctamente`,
                 confirmButtonText: 'Aceptar',
             }).then((result) => {
                 if (result.isConfirmed) {

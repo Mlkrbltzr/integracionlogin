@@ -1,79 +1,66 @@
 import { Router } from "express";
-import { cartsModel } from "../models/carts.model.js";
 import CartManager from "../controllers/CartManager.js";
 
-const router = Router()
+
+const cartRouter = Router();
 const carts = new CartManager()
+const router = Router();
 
-
-//GESTION DE CARRITO
-//get
-router.get("/", async(req,res)=> {
-    try {
-        let carts = await cartsModel.find()
-        res.send({result : "success", payload:  carts})
-    } catch(error){
-        console.log(error)
-        res.status(500).send({ status: "error", error: "Error al obtener carritos" })
-    }
+//Se agrega producto http://localhost:8080/api/carts con post donde nos ingresa un id y un producto con arreglo vacio
+cartRouter.post("/", async (req,res) =>{
+    let newCart = req.body
+    res.send(await carts.addCart(newCart))
+})
+//Traemos todos los carritos con http://localhost:8080/api/carts con get
+cartRouter.get("/", async (req,res)=>{
+    res.send(await carts.getCarts())
+})
+//Traemos el carro por id con http://localhost:8080/api/carts/idCarts con get
+cartRouter.get("/:id", async (req,res)=>{
+    res.send(await carts.getCartById(req.params.id))
 })
 
-// post
-router.post("/", async (req, res) => {
-    if (!req.body) {
-        res.status(400).send({ status: "error", error: "Solicitud sin cuerpo (body)" });
-        return;
-    }
+//Ingresamos el producto al carrito con el siguiente formato http://localhost:8080/api/carts/idCarts/products/idProd con post
+cartRouter.post("/:cid/products/:pid", async (req,res) => {
+    let cartId = req.params.cid
+    let prodId = req.params.pid
+    res.send(await carts.addProductInCart(cartId, prodId))
+})
 
-    let { description, quantity, total } = req.body;
-    if (!description || !quantity || !total) {
-        res.status(400).send({ status: "error", error: "Faltan datos" });
-        return;
-    }
+//Eliminar el producto al carrito con el siguiente formato http://localhost:8080/api/carts/idCarts/products/idProd con delete
+cartRouter.delete("/:cid/products/:pid", async (req,res) => {
+    let cartId = req.params.cid
+    let prodId = req.params.pid
+    res.send(await carts.removeProductFromCart(cartId, prodId))
+})
 
-    try {
-        let result = await cartsModel.create({ description, quantity, total });
-        res.send({ result: "success", payload: result });
-    } catch (error) {
-        console.log(error);
-        res.status(500).send({ status: "error", error: "Error al crear carrito" });
-    }
-});
+//Actualizar el carro con varios productos con el siguiente formato http://localhost:8080/api/carts/idCarts con put
+cartRouter.put("/:cid", async (req,res) => {
+    let cartId = req.params.cid
+    let newProducts = req.body
+    res.send(await carts.updateProductsInCart(cartId, newProducts))
+})
 
-// put actualiza los carritos
-router.put("/:id_carts", async (req, res) => {
-    if (!req.body) {
-        res.status(400).send({ status: "error", error: "Solicitud sin cuerpo (body)" });
-        return;
-    }
+//Actualizar el carro con varios productos con el siguiente formato http://localhost:8080/api/carts/idCarts con put
+cartRouter.put("/:cid/products/:pid", async (req,res) => {
+    let cartId = req.params.cid
+    let prodId = req.params.pid
+    let newProduct = req.body
+    res.send(await carts.updateProductInCart(cartId, prodId, newProduct))
+})
+//Eliminar todos los productos del carro http://localhost:8080/api/carts/idCarts con delete
+cartRouter.delete("/:cid", async (req,res) => {
+    let cartId = req.params.cid
+    res.send(await carts.removeAllProductsFromCart(cartId))
+})
+//Population
+//Traemos todos los carritos con http://localhost:8080/api/carts con get
+cartRouter.get("/population/:cid", async (req,res)=>{
+    let cartId = req.params.cid
+    res.send(await carts.getCartWithProducts(cartId))
+})
 
-    let { id_carts } = req.params;
-    let cartsToReplace = req.body;
-    if (!cartsToReplace.description || !cartsToReplace.quantity || !cartsToReplace.total) {
-        res.status(400).send({ status: "error", error: "Faltan datos en parámetros" });
-        return;
-    }
 
-    try {
-        let result = await cartsModel.updateOne({ _id: id_carts }, cartsToReplace);
-        res.send({ result: "success", payload: result });
-    } catch (error) {
-        console.log(error);
-        res.status(500).send({ status: "error", error: "Error al actualizar carrito" });
-    }
-});
-
-// delete
-router.delete("/:id_carts", async (req, res) => {
-    let { id_carts } = req.params;
-    try {
-        let result = await cartsModel.deleteOne({ _id: id_carts });
-        res.send({ result: "success", payload: result });
-    } catch (error) {
-        console.log(error);
-        res.status(500).send({ status: "error", error: "Error al eliminar carrito" });
-    }
-});
 
 
 
@@ -146,11 +133,19 @@ router.delete("/:cid/products/:pid", async (req, res) => {
 
 //Population
 //Traemos todos los carritos con http://localhost:8080/api/carts con get
-router.get("/population/:cid", async (req,res)=>{
-    let cartId = req.params.cid
-    res.send(await carts.getCartWithProducts(cartId))
-})
+//Population
+
+router.get("/population/:cid", async (req, res) => {
+    const cartId = req.params.cid;  // Obtener cartId de los parámetros de la URL
+
+    try {
+        const cartWithProducts = await carts.getCartWithProducts(cartId);  // Usa la instancia de CartManager
+        res.send({ result: "success", payload: cartWithProducts });
+    } catch (error) {
+        console.error("Error al obtener el carrito con productos poblados:", error);
+        res.status(500).send({ status: "error", error: "Error al obtener el carrito con productos poblados" });
+    }
+});
 
 
-
-export default router;
+export default cartRouter
