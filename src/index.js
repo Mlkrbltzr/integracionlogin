@@ -21,18 +21,16 @@ import MongoStore from 'connect-mongo';
 
 const app = express();
 const PORT = 8080;
-const httpServer = app.listen(PORT, () => console.log("Listen puerto 8080"));
-
+const fileStorage = FileStore(session)
 const product = new ProductManager();
 const cart = new CartManager();
 
-app.use(cookieParser());
 
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: false }));
 
-app.use(cookieParser())
+
 // Configuración de express-session
 // Configuración de express-session con MongoStore
 app.use(
@@ -45,9 +43,25 @@ app.use(
     }),
     secret: "ClaveSecreta",
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true,
+    cookie: {
+      maxAge: 24 * 60 * 60 * 1000,
+    },
   })
 );
+
+// Configuración de rutas
+app.use("/api/carts", cartsRouter); // Rutas relacionadas con carritos
+app.use("/api/products", productsRouter); // Rutas relacionadas con productos
+app.use("/api/msg", messagesRouter); // Rutas relacionadas con mensajes
+app.use("/api/sessions", userRouter); // Rutas relacionadas con sesiones de usuario
+// Configuración de Handlebars
+app.engine("handlebars", engine());
+app.set("view engine", "handlebars");
+app.set("views", path.resolve(__dirname + "/views"));
+// Archivos estáticos
+app.use("/", express.static(__dirname + "/public"));
+
 
 // Configuración de Passport para autenticación
 initializePassword();
@@ -64,27 +78,11 @@ mongoose
     console.error("Error al intentar conectarse a la base de datos", error);
   });
 
-// Configuración de rutas
-app.use("/api/carts", cartsRouter); // Rutas relacionadas con carritos
-app.use("/api/products", productsRouter); // Rutas relacionadas con productos
-app.use("/api/msg", messagesRouter); // Rutas relacionadas con mensajes
-app.use("/api/sessions", userRouter); // Rutas relacionadas con sesiones de usuario
 
-// Configuración de Handlebars
-app.engine("handlebars", engine());
-app.set("view engine", "handlebars");
-app.set("views", path.resolve(__dirname + "/views"));
 
-// Archivos estáticos
-app.use("/", express.static(__dirname + "/public"));
+
 
 // Rutas adicionales
-app.get("/chat", (req, res) => {
-  // Página de chat
-  res.render("chat", {
-    title: "Chat con Mongoose",
-  });
-});
 
 app.get("/products", async (req, res) => {
   if (!req.session.emailUsuario) {
