@@ -1,156 +1,131 @@
+import express from "express"
+import prodRouter from "./router/product.routes.js"
+import cartRouter from "./router/cart.routes.js"
+import ProductManager from "./DAO/manager/ProductManager.js"
+import CartManager from "./DAO/manager/CartManager.js"
+import mongoose from "mongoose"
+import { engine } from "express-handlebars"
+import * as path from "path"
+import __dirname from "./utils.js"
+import userRouter from "./router/user.routes.js"
+import MongoStore from "connect-mongo"
+import session from 'express-session'
+import FileStore from 'session-file-store'
+import passport from "passport"
+import initializePassword from "./config/passport.config.js"
 
-import __dirname from "./utils.js";
-import CartManager from "./controllers/CartManager.js";
-import ProductManager from "./controllers/ProductManager.js";
-import cartsRouter from "./router/carts.routes.js";
-import productsRouter from "./router/product.routes.js";
-import userRouter from "./router/user.routes.js";
-import messagesRouter from "./router/messages.routes.js";
-import { messagesModel } from "./models/messages.model.js";
-import express from "express";
-import { engine } from "express-handlebars";
-import * as path from "path";
-import mongoose from "mongoose";
-import cookieParser from "cookie-parser";
-import session from 'express-session';
-import FileStore from 'session-file-store';
-import passport from "passport";
-import initializePassword from "./config/passport.config.js";
-import MongoStore from 'connect-mongo';
-
-
-const app = express();
-const PORT = 8080;
+//El funcionamiento se valido con la extensión Thunder Client desde Visual Studio Code
+//Actualmente el proyecto se ejecuta desde el ingreso del  Login http://localhost:8080/login
+const app = express()
+//Se define puerto 8080 para ejecutar la aplicacion
+const PORT = 8080
 const fileStorage = FileStore(session)
-const product = new ProductManager();
-const cart = new CartManager();
+const product = new ProductManager()
+const cart = new CartManager()
 
+app.use(express.json())
+app.use(express.urlencoded({extended: false}))
 
+app.listen(PORT, () => {
+    console.log(`Servidor Express Puerto ${PORT}`)
+})
+//-------------------------------------Mongoose----------------------------------------------------------//
+mongoose.connect("mongodb+srv://geastudilloaray:Kekax3E6hriT9VIm@cluster0.y9dzoa8.mongodb.net/segundaentrega?retryWrites=true&w=majority")
+.then(()=>{
+    console.log("Conectado a la base de datos")
+})
+.catch(error => {
+    console.error("Error al conectarse a la base de datos, error"+error)
+})
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+//-----------------------------Session Mongo Atlas-----------------------------------------//
 
-
-// Configuración de express-session
-// Configuración de express-session con MongoStore
-app.use(
-  session({
+app.use(session({
+    //Session registrada en mongo atlas
     store: MongoStore.create({
-      // Utilizamos MongoDB para almacenar sesiones
-      mongoUrl: "mongodb+srv://geastudilloaray:Kekax3E6hriT9VIm@cluster0.y9dzoa8.mongodb.net/segundaentrega?retryWrites=true&w=majority",
-      mongoOptions: { useNewUrlParser: true, useUnifiedTopology: true },
-      ttl: 3600, // Tiempo de vida de la sesión en segundos
+        mongoUrl: "mongodb+srv://geastudilloaray:Kekax3E6hriT9VIm@cluster0.y9dzoa8.mongodb.net/segundaentrega?retryWrites=true&w=majority",
+        mongoOptions: { useNewUrlParser: true, useUnifiedTopology: true}, ttl: 3600
     }),
     secret: "ClaveSecreta",
     resave: false,
-    saveUninitialized: true,
-    cookie: {
-      maxAge: 24 * 60 * 60 * 1000,
-    },
-  })
-);
+    saveUninitialized: false,
+}))
+//Passport//
+initializePassword()
+app.use(passport.initialize())
+app.use(passport.session())
+//End Passport//
+//-------------------------------------------------------------------------------------//
+//Se simplifica codigo de middleware colocando lo siguiente
+//IMPORTANTE COLOCAR LAS RUTAS DESPUES DE QUE SE CREE LA SESION PORQUE SI NO, NO FUNCIONA EL REQ.SESSION
+app.use("/api/products", prodRouter)
+app.use("/api/carts", cartRouter)
+app.use("/api/sessions", userRouter)
 
-// Configuración de rutas
-app.use("/api/carts", cartsRouter); // Rutas relacionadas con carritos
-app.use("/api/products", productsRouter); // Rutas relacionadas con productos
-app.use("/api/msg", messagesRouter); // Rutas relacionadas con mensajes
-app.use("/api/sessions", userRouter); // Rutas relacionadas con sesiones de usuario
-// Configuración de Handlebars
-app.engine("handlebars", engine());
-app.set("view engine", "handlebars");
-app.set("views", path.resolve(__dirname + "/views"));
-// Archivos estáticos
-app.use("/", express.static(__dirname + "/public"));
+//-----Handlebars-----//
+//------------------------Handlebars----------------------------------//
+app.engine("handlebars", engine())
+app.set("view engine", "handlebars")
+app.set("views", path.resolve(__dirname + "/views"))
 
+//CSS Static
+app.use("/", express.static(__dirname + "/public"))
 
-// Configuración de Passport para autenticación
-initializePassword();
-app.use(passport.initialize());
-app.use(passport.session());
-
-// Conexión a la base de datos MongoDB
-mongoose
-  .connect("mongodb+srv://geastudilloaray:Kekax3E6hriT9VIm@cluster0.y9dzoa8.mongodb.net/segundaentrega?retryWrites=true&w=majority")
-  .then(() => {
-    console.log("Conectado a la base de datos");
-  })
-  .catch((error) => {
-    console.error("Error al intentar conectarse a la base de datos", error);
-  });
-
-
-
-
-
-// Rutas adicionales
-
+//Ingreso Products http://localhost:8080/products
 app.get("/products", async (req, res) => {
-  if (!req.session.emailUsuario) {
-    // Redirigir a la página de inicio de sesión si el usuario no ha iniciado sesión
-    return res.redirect("/login");
-  }
-  let allProducts = await product.getProducts();
-  allProducts = allProducts.map((product) => product.toJSON());
-  res.render("home", {
-    title: "Mestizzo | Productos",
-    products: allProducts,
-  });
-});
-
-app.get("/products/:id", async (req, res) => {
-  try {
-    const productId = req.params.id;
-    const productDetails = await product.getProductById(productId);
-    if (productDetails) {
-      const price = typeof productDetails.price === "number" ? productDetails.price : 0;
-      const stock = typeof productDetails.stock === "number" ? productDetails.stock : 0;
-      const minimo = typeof productDetails.minimo === "number" ? productDetails.minimo : 0;
-
-      const cleanedProduct = {
-        title: productDetails.title,
-        description: productDetails.description,
-        price: price,
-        stock: stock,
-        minimo: minimo,
-        category: productDetails.category,
-        thumbnails: productDetails.thumbnails,
-      };
-
-      res.render("products", { product: cleanedProduct });
-    } else {
-      res.status(404).json({ error: "Producto no encontrado" });
+    if (!req.session.emailUsuario) 
+    {
+        return res.redirect("/login")
     }
-  } catch (error) {
-    console.error("Error al obtener el producto:", error);
-    res.status(500).json({ error: "Error al obtener el producto" });
-  }
-});
-
-app.get("/cart/:cid", async (req, res) => {
-  const cartId = req.params.cid;
-
-  try {
-    const cartWithProducts = await cart.getCartWithProducts(cartId);
-
-    res.render("cart", {
-      title: "Detalles del Carrito",
-      cartWithProducts: cartWithProducts,
+    let allProducts  = await product.getProducts()
+    allProducts = allProducts.map(product => product.toJSON());
+    res.render("products", {
+        title: "Vista Productos",
+        products : allProducts,
+        email: req.session.emailUsuario,
+        rol: req.session.rolUsuario,
     });
-  } catch (error) {
-    console.error("Error al obtener los detalles del carrito:", error);
-    res.status(500).json({ error: "Error al obtener los detalles del carrito" });
-  }
-});
+})
+app.get("/carts/:cid", async (req, res) => {
+    let id = req.params.cid
+    let allCarts  = await cart.getCartWithProducts(id)
+    res.render("cart", {
+        title: "Vista Carro",
+        carts : allCarts
+    });
+})
+//Ingreso Login http://localhost:8080/login
+app.get("/login", async (req, res) => {
+    res.render("login", {
+        title: "Vista Login",
+    });
+    
+})
+//Ingreso Register http://localhost:8080/register
+app.get("/register", async (req, res) => { 
+    res.render("register", {
+        title: "Vista Register",
+    });
+})
+//Ingreso Profile http://localhost:8080/profile
+app.get("/profile", async (req, res) => { 
+    if (!req.session.emailUsuario) 
+    {
+        return res.redirect("/login")
+    }
+    res.render("profile", {
+        title: "Vista Profile Admin",
+        first_name: req.session.nomUsuario,
+        last_name: req.session.apeUsuario,
+        email: req.session.emailUsuario,
+        rol: req.session.rolUsuario,
 
-app.get("/chat", async (req, res) => {
-  res.render("chat", {
-    title: "Chat con Mongoose",
-  });
-});
+    });
+})
 
-app.get("/multer", async (req, res) => {
-  res.render("upload", {
-    title: "Multer",
-  });
-});
-
+app.get("/", async (req, res) => { 
+    if (!req.session.emailUsuario) 
+    {
+        return res.redirect("/login")
+    }
+})
